@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Whiteboard background -->
+  <rect x="2" y="4" width="28" height="20" rx="2" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+  
+  <!-- Drawing content -->
+  <path d="M6 10 Q10 8 14 10 T22 10" stroke="#3b82f6" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M8 14 Q12 16 16 14 T24 14" stroke="#ef4444" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="26" cy="18" r="1.5" fill="#10b981"/>
+  
+  <!-- Pen/marker -->
+  <rect x="24" y="26" width="6" height="2" rx="1" fill="#6366f1" transform="rotate(45 27 27)"/>
+  <rect x="22" y="28" width="2" height="1" rx="0.5" fill="#4f46e5" transform="rotate(45 23 28.5)"/>
+  
+  <!-- Stand/legs -->
+  <line x1="4" y1="24" x2="2" y2="30" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="28" y1="24" x2="30" y2="30" stroke="#6b7280" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
