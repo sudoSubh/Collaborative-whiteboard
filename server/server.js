@@ -15,8 +15,8 @@ const io = socketIo(server, {
       "http://localhost:5175", 
       "http://localhost:5176",
       // Vercel deployment - UPDATE WITH YOUR ACTUAL VERCEL URL
-      "https://your-app-name.vercel.app",
-      "https://your-app-name-git-main-your-username.vercel.app",
+      "https://collaborative-whiteboard-liart.vercel.app/",
+      
       // Add your custom domain if you have one
       // "https://yourdomain.com"
     ],
@@ -36,8 +36,8 @@ app.use(cors({
     "http://localhost:5175", 
     "http://localhost:5176",
     // Vercel deployment - UPDATE WITH YOUR ACTUAL VERCEL URL
-    "https://your-app-name.vercel.app",
-    "https://your-app-name-git-main-your-username.vercel.app",
+    "https://collaborative-whiteboard-liart.vercel.app/",
+
     // Add your custom domain if you have one
     // "https://yourdomain.com"
   ],
