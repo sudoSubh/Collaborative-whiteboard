@@ -19,10 +19,7 @@
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
-  "workspaces": [
-    "client",
-    "server"
-  ],
+
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"

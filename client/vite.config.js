@@ -5,16 +5,25 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   build: {
-    // Production optimizations
-    minify: 'terser',
+    // Production optimizations - simplified for better compatibility
+    minify: 'esbuild',
     sourcemap: false,
+    target: 'es2015',
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          router: ['react-router-dom'],
-          socket: ['socket.io-client'],
-          ui: ['lucide-react']
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor';
+            }
+            if (id.includes('socket.io-client')) {
+              return 'socket';
+            }
+            if (id.includes('lucide-react')) {
+              return 'ui';
+            }
+            return 'vendor';
+          }
         }
       }
     },
