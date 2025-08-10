@@ -4,7 +4,7 @@ The project **"Real-Time Collaborative Whiteboard"** is an innovative digital ca
 
 This project demonstrates modern web development practices with **real-time synchronization** and has been built with performance and user experience in mind.
 
-## 🚀 Live Demo - https://your-whiteboard-demo.vercel.app/
+## 🚀 Live Demo - https://collaborative-whiteboard-liart.vercel.app/
 
 ## 🌟 Features
 

@@ -10,10 +10,10 @@ const io = socketIo(server, {
   cors: {
     origin: [
       // Local development
-      "http://localhost:5173", 
+      /*"http://localhost:5173", 
       "http://localhost:5174", 
       "http://localhost:5175", 
-      "http://localhost:5176",
+      "http://localhost:5176",*/
       // Vercel deployment - UPDATE WITH YOUR ACTUAL VERCEL URL
       "https://collaborative-whiteboard-liart.vercel.app/",
       
@@ -31,10 +31,10 @@ const io = socketIo(server, {
 app.use(cors({
   origin: [
     // Local development
-    "http://localhost:5173", 
+    /*"http://localhost:5173", 
     "http://localhost:5174", 
     "http://localhost:5175", 
-    "http://localhost:5176",
+    "http://localhost:5176",*/
     // Vercel deployment - UPDATE WITH YOUR ACTUAL VERCEL URL
     "https://collaborative-whiteboard-liart.vercel.app/",
 
