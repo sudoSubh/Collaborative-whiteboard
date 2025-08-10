@@ -54,31 +54,39 @@ const Whiteboard = () => {
       return;
     }
 
+    console.log('Connecting to socket server:', SOCKET_URL);
     const socket = io(SOCKET_URL);
     socketRef.current = socket;
 
     // Connection handling
     socket.on('connect', () => {
+      console.log('Connected to server!', socket.id);
       setConnectionStatus('connected');
       if (action === 'create') {
+        console.log('Creating room for user:', username);
         socket.emit('create-room', { username });
       } else if (action === 'random') {
+        console.log('Joining random room for user:', username);
         socket.emit('join-random', { username });
       } else {
+        console.log('Joining room:', roomId, 'for user:', username);
         socket.emit('join-room', { roomId, username });
       }
     });
 
     socket.on('disconnect', () => {
+      console.log('Disconnected from server');
       setConnectionStatus('disconnected');
     });
 
-    socket.on('connect_error', () => {
+    socket.on('connect_error', (error) => {
+      console.log('Connection error:', error);
       setConnectionStatus('error');
     });
 
     // Room events
     socket.on('room-created', (data) => {
+      console.log('Room created:', data);
       setRoomCode(data.roomId);
       setUserCount(data.userCount);
       window.history.replaceState(null, '', `/room/${data.roomId}`);
@@ -86,6 +94,7 @@ const Whiteboard = () => {
     });
 
     socket.on('room-joined', (data) => {
+      console.log('Room joined:', data);
       setRoomCode(data.roomId);
       setUserCount(data.userCount);
       window.history.replaceState(null, '', `/room/${data.roomId}`);
@@ -93,6 +102,7 @@ const Whiteboard = () => {
     });
 
     socket.on('room-error', (data) => {
+      console.log('Room error:', data);
       alert(data.error);
       navigate('/');
     });

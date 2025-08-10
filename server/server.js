@@ -3,25 +3,35 @@ const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
 
+// Configuration constants
+const ROOM_CLEANUP_INTERVAL = 300000; // 5 minutes
+const MAX_USERS_PER_ROOM = 50;
+const MAX_MESSAGE_LENGTH = 500;
+
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: [
-      // Local development
-      /*"http://localhost:5173", 
+    origin: process.env.NODE_ENV === 'production' ? [
+      // Vercel deployment
+      "https://collaborative-whiteboard-liart.vercel.app",
+      // Add your Render backend URL here when you get it
+      // "https://your-render-app-name.onrender.com"
+    ] : [
+      // Local development - more permissive for testing
+      "http://localhost:5173", 
       "http://localhost:5174", 
       "http://localhost:5175", 
-      "http://localhost:5176",*/
-      // Vercel deployment - UPDATE WITH YOUR ACTUAL VERCEL URL
-      "https://collaborative-whiteboard-liart.vercel.app/",
-      
-      // Add your custom domain if you have one
-      // "https://yourdomain.com"
+      "http://localhost:5176",
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:5174",
+      "http://127.0.0.1:5175",
+      "http://127.0.0.1:5176"
     ],
     methods: ["GET", "POST"],
-    credentials: true
+    credentials: true,
+    allowEIO3: true
   },
   pingTimeout: 60000,
   pingInterval: 25000,
@@ -29,17 +39,21 @@ const io = socketIo(server, {
 });
 
 app.use(cors({
-  origin: [
-    // Local development
-    /*"http://localhost:5173", 
+  origin: process.env.NODE_ENV === 'production' ? [
+    // Vercel deployment
+    "https://collaborative-whiteboard-liart.vercel.app",
+    // Add your Render backend URL here when you get it
+    // "https://your-render-app-name.onrender.com"
+  ] : [
+    // Local development - more permissive for testing
+    "http://localhost:5173", 
     "http://localhost:5174", 
     "http://localhost:5175", 
-    "http://localhost:5176",*/
-    // Vercel deployment - UPDATE WITH YOUR ACTUAL VERCEL URL
-    "https://collaborative-whiteboard-liart.vercel.app/",
-
-    // Add your custom domain if you have one
-    // "https://yourdomain.com"
+    "http://localhost:5176",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+    "http://127.0.0.1:5175",
+    "http://127.0.0.1:5176"
   ],
   credentials: true
 }));
@@ -94,7 +108,7 @@ function leaveRoom(socketId) {
           rooms.delete(roomId);
 
         }
-      }, 5 * 60 * 1000); // 5 minutes
+      }, ROOM_CLEANUP_INTERVAL);
     }
 
     userRooms.delete(socketId);
@@ -104,7 +118,7 @@ function leaveRoom(socketId) {
 }
 
 function getRandomRoom() {
-  const availableRooms = [...rooms.values()].filter(room => room.users.size < 10);
+  const availableRooms = [...rooms.values()].filter(room => room.users.size < MAX_USERS_PER_ROOM);
   if (availableRooms.length === 0) {
     return createRoom();
   }
@@ -113,15 +127,16 @@ function getRandomRoom() {
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
-
+  console.log(`New client connected: ${socket.id}`);
 
   // Create room
   socket.on('create-room', (data) => {
     try {
-
+      console.log(`Create room request from ${socket.id}:`, data);
       const username = data.username || 'Anonymous';
       const roomId = createRoom();
       const result = joinRoom(socket.id, roomId, username);
+      console.log(`Room created: ${roomId}, User: ${username}`);
 
       if (result.success) {
         socket.join(roomId);
@@ -154,7 +169,7 @@ io.on('connection', (socket) => {
   // Join specific room
   socket.on('join-room', (data) => {
     try {
-
+      console.log(`Join room request from ${socket.id}:`, data);
       const { roomId, username } = data;
       const result = joinRoom(socket.id, roomId, username || 'Anonymous');
 
@@ -187,6 +202,7 @@ io.on('connection', (socket) => {
 
   // Join random room
   socket.on('join-random', (data) => {
+    console.log(`Join random room request from ${socket.id}:`, data);
     const roomId = getRandomRoom();
     const result = joinRoom(socket.id, roomId, data.username || 'Anonymous');
 
@@ -242,7 +258,7 @@ io.on('connection', (socket) => {
       if (data && data.message && data.username) {
         const messageData = {
           username: data.username,
-          message: data.message.substring(0, 500), // Limit message length
+          message: data.message.substring(0, MAX_MESSAGE_LENGTH),
           timestamp: data.timestamp || Date.now()
         };
 
@@ -257,7 +273,7 @@ io.on('connection', (socket) => {
   // Handle disconnect
   socket.on('disconnect', () => {
     try {
-
+      console.log(`Client disconnected: ${socket.id}`);
       const roomId = leaveRoom(socket.id);
       if (roomId) {
         const room = rooms.get(roomId);
@@ -283,6 +299,14 @@ io.on('connection', (socket) => {
 });
 
 // API endpoints
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Whiteboard Server is running!', 
+    timestamp: new Date().toISOString(),
+    rooms: rooms.size 
+  });
+});
+
 app.get('/api/rooms', (_, res) => {
   const roomList = [...rooms.values()].map(room => ({
     id: room.id,
@@ -296,4 +320,7 @@ const PORT = process.env.PORT || 3004;
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Server accessible at http://localhost:${PORT}`);
+  console.log(`CORS origins configured:`, io.engine.opts.cors.origin);
+  console.log(`Active rooms: ${rooms.size}`);
 });
