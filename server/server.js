@@ -8,27 +8,28 @@ const ROOM_CLEANUP_INTERVAL = 300000; // 5 minutes
 const MAX_USERS_PER_ROOM = 50;
 const MAX_MESSAGE_LENGTH = 500;
 
+// CORS origins configuration
+const CORS_ORIGINS = [
+  // Production URLs
+  "https://collaborative-whiteboard-liart.vercel.app",
+  "https://collaborative-whiteboard-bmgl.onrender.com",
+  // Development URLs
+  "http://localhost:5173", 
+  "http://localhost:5174", 
+  "http://localhost:5175", 
+  "http://localhost:5176",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
+  "http://127.0.0.1:5175",
+  "http://127.0.0.1:5176"
+];
+
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' ? [
-      // Vercel deployment
-      "https://collaborative-whiteboard-liart.vercel.app",
-      // Add your Render backend URL here when you get it
-      // "https://your-render-app-name.onrender.com"
-    ] : [
-      // Local development - more permissive for testing
-      "http://localhost:5173", 
-      "http://localhost:5174", 
-      "http://localhost:5175", 
-      "http://localhost:5176",
-      "http://127.0.0.1:5173",
-      "http://127.0.0.1:5174",
-      "http://127.0.0.1:5175",
-      "http://127.0.0.1:5176"
-    ],
+    origin: CORS_ORIGINS,
     methods: ["GET", "POST"],
     credentials: true,
     allowEIO3: true
@@ -39,24 +40,29 @@ const io = socketIo(server, {
 });
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? [
-    // Vercel deployment
-    "https://collaborative-whiteboard-liart.vercel.app",
-    // Add your Render backend URL here when you get it
-    // "https://your-render-app-name.onrender.com"
-  ] : [
-    // Local development - more permissive for testing
-    "http://localhost:5173", 
-    "http://localhost:5174", 
-    "http://localhost:5175", 
-    "http://localhost:5176",
-    "http://127.0.0.1:5173",
-    "http://127.0.0.1:5174",
-    "http://127.0.0.1:5175",
-    "http://127.0.0.1:5176"
-  ],
+  origin: CORS_ORIGINS,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
+
+// Additional CORS middleware for Socket.IO
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (CORS_ORIGINS.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 app.use(express.json());
 
 // Store rooms and their data
@@ -321,6 +327,7 @@ const PORT = process.env.PORT || 3004;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Server accessible at http://localhost:${PORT}`);
-  console.log(`CORS origins configured:`, io.engine.opts.cors.origin);
+  console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+  console.log(`CORS origins configured:`, CORS_ORIGINS);
   console.log(`Active rooms: ${rooms.size}`);
 });

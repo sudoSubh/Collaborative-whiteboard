@@ -55,7 +55,12 @@ const Whiteboard = () => {
     }
 
     console.log('Connecting to socket server:', SOCKET_URL);
-    const socket = io(SOCKET_URL);
+    const socket = io(SOCKET_URL, {
+      withCredentials: true,
+      transports: ['websocket', 'polling'],
+      timeout: 20000,
+      forceNew: true
+    });
     socketRef.current = socket;
 
     // Connection handling
